@@ -4,7 +4,7 @@ const port = 3000;
 const query = require('./banco.js');
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
-const __dir = 'C:\Users\Caio\Desktop\Routes';
+
 
 
 app.post('/positions', async (req, res) => {
