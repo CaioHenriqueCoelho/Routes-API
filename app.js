@@ -15,7 +15,12 @@ app.post('/positions', async (req, res) => {
         }
         const result_ini = await query('select latitude as lat, longitude as lon, logradouro from data__log where cep = $1', [info.cep_ini]);
         const result_des = await query('select latitude as lat, longitude as lon, logradouro from data__log where cep = $1', [info.cep_des]);
-        res.json({message:"Sucesso!!", info_ini: result_ini.rows[0], info_des: result_des.rows[0]});
+        if(result_ini.rows.length > 0 && result_des.rows.length > 0){
+            res.json({message:"Sucesso!!", info_ini: result_ini.rows[0], info_des: result_des.rows[0]});
+        }else{
+            res.json({message: "Not Found"});
+        }
+        
       } catch (error) {
         console.log(error);
         res.json({message:"Algo deu Errado!!"});
