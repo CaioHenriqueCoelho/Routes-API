@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leaflet Routing Machine</title>
+  <!-- Folha de estilos do Leaflet Routing Machine -->
+  <!-- Biblioteca do Leaflet Routing Machine -->
+  <!-- Folha de estilos do Leaflet -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.js"></script>
+  <style>
+	*{
+	margin: 0px;
+	padding: 0px;
+	user-select: none;
+	}
+	
+    #mapid {
+      height: 100vh;
+      width: 100%;
+    }
+	.fixo{
+		text-align: center;
+	   font-size: 30px;
+	   z-index: 1100;
+	   position: relative;
+	   margin: 10px;
+	   height:70px;
+	   width:200px;
+	   border: solid 1px black;
+	   border-radius: 10px;
+	}
+	button{
+		background-color:rgb(186, 246, 220);
+	}
+  </style>
+</head>
+<body>
+
+</body>
+  <script>
+    var div = document.createElement('div');
+	div.setAttribute('id','mapid');
+	var input1 = document.createElement('input');
+	var input2 = document.createElement('input');
+	var button = document.createElement('button');
+	button.innerText = 'Gerar Rotas';
+	button.classList.add('fixo');
+	button.addEventListener('click', async ()=> {
+		const body = {
+			cep_ini: input1.value,
+			cep_des: input2.value
+		};
+
+		const config = {
+			method: 'POST', 
+			headers: { 'Content-Type': 'application/json' }, 
+			body: JSON.stringify(body) 
+		};
+		var result = await fetch('/positions', config);
+		var dados = await result.json();
+		console.log('dados',dados);
+		gen_route(dados.info_ini, dados.info_des);
+	});
+	input1.classList.add('fixo');
+	input2.classList.add('fixo');
+	input2.setAttribute('type','text');
+	input2.setAttribute('type','text');
+	input1.setAttribute('placeholder','cep de partida');
+	input2.setAttribute('placeholder','cep de destino');
+	document.body.appendChild(div);
+	div.appendChild(input1);
+	div.appendChild(input2);
+	div.appendChild(button);
+	
+    const map = L.map('mapid').setView([-22.87894018582029, -47.21101030316701], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+	function createCustomMarker(latlng, color) {
+  		const iconUrl = `https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`;
+  		const shadowUrl = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png';
+  		const icon = L.icon({
+    		iconUrl: iconUrl,
+    		shadowUrl: shadowUrl,
+    		iconSize: [25, 41],
+    		iconAnchor: [12, 41],
+    		popupAnchor: [1, -34],
+    		shadowSize: [41, 41]
+  		});
+  		const marker = L.marker(latlng, { icon: icon });
+  		return marker;
+	}
+
+	function gen_route(pos_ini, pos_des) {
+  		const control = L.Routing.control({
+    	waypoints: [
+      		L.latLng(pos_ini.lat, pos_ini.lon),
+      		L.latLng(pos_des.lat, pos_des.lon),
+    	],
+    	createMarker: function(i, wp, nWps) {
+      		const color = (i === 0) ? 'blue' : 'green';
+      		return createCustomMarker(wp.latLng, color);
+    	},
+    	lineOptions: {
+      	styles: [{ color: '#3388ff', weight: 6 }]
+    	}
+  		}).addTo(map);
+	}
+  </script>
+</html>
